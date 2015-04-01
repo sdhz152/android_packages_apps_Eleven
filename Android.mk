@@ -19,6 +19,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     android-support-v7-recyclerview \
     guava
 
+LOCAL_STATIC_JAVA_LIBRARIES += libSudaPinYin
+
 LOCAL_AAPT_FLAGS := \
     --auto-add-overlay \
     --extra-packages android.support.v7.cardview \
