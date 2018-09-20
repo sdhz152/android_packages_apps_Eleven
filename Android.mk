@@ -14,6 +14,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     guava \
     junit
 
+LOCAL_STATIC_JAVA_LIBRARIES += libSudaPinYin
+
 LOCAL_STATIC_ANDROID_LIBRARIES := \
     android-support-v4 \
     android-support-v7-cardview \
