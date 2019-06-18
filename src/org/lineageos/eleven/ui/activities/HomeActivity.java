@@ -323,17 +323,14 @@ public class HomeActivity extends SlidingPanelActivity implements
                 MusicUtils.removeFromCache(this, mKey);
                 final Uri selectedImage = data.getData();
 
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Bitmap bitmap = ImageFetcher.decodeSampledBitmapFromUri(getContentResolver(),
-                                selectedImage);
+                new Thread(() -> {
+                    Bitmap bitmap = ImageFetcher.decodeSampledBitmapFromUri(getContentResolver(),
+                            selectedImage);
 
-                        ImageFetcher imageFetcher = ElevenUtils.getImageFetcher(HomeActivity.this);
-                        imageFetcher.addBitmapToCache(mKey, bitmap);
+                    ImageFetcher imageFetcher = ElevenUtils.getImageFetcher(HomeActivity.this);
+                    imageFetcher.addBitmapToCache(mKey, bitmap);
 
-                        MusicUtils.refresh();
-                    }
+                    MusicUtils.refresh();
                 }).start();
             }
         }
@@ -500,14 +497,12 @@ public class HomeActivity extends SlidingPanelActivity implements
     }
 
     private boolean needRequestStoragePermission() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return false;
-
         boolean needRequest = false;
         String[] permissions = {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE
         };
-        ArrayList<String> permissionList = new ArrayList<String>();
+        ArrayList<String> permissionList = new ArrayList<>();
         for (String permission : permissions) {
             if (checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
                 permissionList.add(permission);

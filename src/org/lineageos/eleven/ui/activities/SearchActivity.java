@@ -90,6 +90,11 @@ public class SearchActivity extends FragmentActivity implements
         OnScrollListener, OnQueryTextListener, OnItemClickListener, ServiceConnection,
         OnTouchListener {
     /**
+     * Intent extra for identifying the search type to filter for
+     */
+    public static String EXTRA_SEARCH_MODE = "search_mode";
+
+    /**
      * Loading delay of 500ms so we don't flash the screen too much when loading new searches
      */
     private static int LOADING_DELAY = 500;
@@ -267,7 +272,7 @@ public class SearchActivity extends FragmentActivity implements
 
         // Initialize the adapter
         SummarySearchAdapter adapter = new SummarySearchAdapter(this);
-        mAdapter = new SectionAdapter<SearchResult, SummarySearchAdapter>(this, adapter);
+        mAdapter = new SectionAdapter<>(this, adapter);
         // Set the prefix
         mAdapter.getUnderlyingAdapter().setPrefix(mFilterString);
         mAdapter.setupHeaderParameters(R.layout.list_search_header, false);
@@ -308,7 +313,7 @@ public class SearchActivity extends FragmentActivity implements
             mTopLevelSearch = false;
 
             // get the search type to filter by
-            int type = getIntent().getIntExtra(SearchManager.SEARCH_MODE, -1);
+            int type = getIntent().getIntExtra(SearchActivity.EXTRA_SEARCH_MODE, -1);
             if (type >= 0 && type < ResultType.values().length) {
                 mSearchType = ResultType.values()[type];
             }
@@ -395,7 +400,7 @@ public class SearchActivity extends FragmentActivity implements
             comparator = SectionCreatorUtils.createSearchResultComparison(this);
         }
 
-        return new SectionCreator<SearchResult>(this,
+        return new SectionCreator<>(this,
                 new SummarySearchLoader(this, mFilterString, mSearchType),
                 comparator);
     }
@@ -554,9 +559,8 @@ public class SearchActivity extends FragmentActivity implements
      */
     public void setLoading() {
         if (mCurrentState != VisibleState.Loading) {
-            if (!mHandler.hasCallbacks(mLoadingRunnable)) {
-                mHandler.postDelayed(mLoadingRunnable, LOADING_DELAY);
-            }
+            mHandler.removeCallbacks(mLoadingRunnable);
+            mHandler.postDelayed(mLoadingRunnable, LOADING_DELAY);
         }
     }
 
@@ -646,7 +650,7 @@ public class SearchActivity extends FragmentActivity implements
             SearchResult item = mAdapter.getTItem(position - 1);
             Intent intent = new Intent(this, SearchActivity.class);
             intent.putExtra(SearchManager.QUERY, mFilterString);
-            intent.putExtra(SearchManager.SEARCH_MODE, item.mType.ordinal());
+            intent.putExtra(SearchActivity.EXTRA_SEARCH_MODE, item.mType.ordinal());
             startActivity(intent);
         } else {
             SearchResult item = mAdapter.getTItem(position);
@@ -753,7 +757,7 @@ public class SearchActivity extends FragmentActivity implements
          * @return the results for that search
          */
         protected List<SearchResult> runSearchForType() {
-            ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+            ArrayList<SearchResult> results = new ArrayList<>();
             Cursor cursor = null;
             try {
                 if (mSearchType == ResultType.Playlist) {
@@ -799,7 +803,7 @@ public class SearchActivity extends FragmentActivity implements
          * @return the results for that search
          */
         public List<SearchResult> runGenericSearch() {
-            ArrayList<SearchResult> results = new ArrayList<SearchResult>();
+            ArrayList<SearchResult> results = new ArrayList<>();
             // number of types to query for
             final int numTypes = ResultType.getNumTypes();
 
@@ -895,14 +899,12 @@ public class SearchActivity extends FragmentActivity implements
                 keywords[i] = "%" + keywords[i] + "%";
             }
 
-            String where = "";
-
-            // make the where clause
+            final StringBuilder where = new StringBuilder();
             for (int i = 0; i < keywords.length; i++) {
                 if (i == 0) {
-                    where = "name LIKE ?";
+                    where.append("name LIKE ?");
                 } else {
-                    where += " AND name LIKE ?";
+                    where.append(" AND name LIKE ?");
                 }
             }
 
@@ -913,7 +915,7 @@ public class SearchActivity extends FragmentActivity implements
                             BaseColumns._ID,
                         /* 1 */
                             MediaStore.Audio.PlaylistsColumns.NAME
-                    }, where, keywords, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
+                    }, where.toString(), keywords, MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
         }
     }
 
@@ -928,7 +930,7 @@ public class SearchActivity extends FragmentActivity implements
         @Override
         public ArrayAdapter<String> loadInBackground() {
             ArrayList<String> strings = SearchHistory.getInstance(getContext()).getRecentSearches();
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(),
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                     R.layout.list_item_search_history, R.id.line_one);
             adapter.addAll(strings);
             return adapter;
