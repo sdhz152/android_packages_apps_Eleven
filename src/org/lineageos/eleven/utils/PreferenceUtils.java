@@ -81,6 +81,9 @@ public final class PreferenceUtils {
     // show visualizer flag
     public static final String SHOW_VISUALIZER = "music_visualization";
 
+    // use blur throughout the UI
+    public static final String USE_BLUR = "use_blur";
+
     // shake to play flag
     public static final String SHAKE_TO_PLAY = "shake_to_play";
 
@@ -139,6 +142,15 @@ public final class PreferenceUtils {
     public void setOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener){
         mPreferences.registerOnSharedPreferenceChangeListener(listener);
     }
+
+    /**
+     * Set the listener for preference change
+     * @param listener
+     */
+    public void removeOnSharedPreferenceChangeListener(OnSharedPreferenceChangeListener listener){
+        mPreferences.unregisterOnSharedPreferenceChangeListener(listener);
+    }
+
 
     /**
      * Returns the last page the user was on when the app was exited.
@@ -352,6 +364,10 @@ public final class PreferenceUtils {
 
     public boolean getShowVisualizer() {
         return mPreferences.getBoolean(SHOW_VISUALIZER, false);
+    }
+
+    public boolean getUseBlur() {
+        return mPreferences.getBoolean(USE_BLUR, false);
     }
 
     public boolean getShakeToPlay() {
